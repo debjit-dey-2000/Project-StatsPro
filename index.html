@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project StatsPro™</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="atmos" aria-hidden="true"></div>
+<div class="tc" id="TC"></div>
+<div class="app-shell">
+<aside class="app-sidebar fi">
+  <button class="rail-logo" onclick="openSidebarCanvas()" aria-label="Open sidebar menu">
+    <div class="logo-icon"><i class="fa-solid fa-chart-line"></i></div>
+  </button>
+  <div class="rail-spacer"></div>
+  <div class="rail-user" id="railAuthBar"></div>
+</aside>
+<div class="sidebar-scrim" id="sidebarScrim" onclick="closeSidebarCanvas()"></div>
+<aside class="sidebar-canvas" id="sidebarCanvas" aria-hidden="true">
+  <div class="sidebar-brand">
+    <div class="brand-row">
+      <div class="logo-icon"><i class="fa-solid fa-chart-line"></i></div>
+      <div>
+        <h1 class="app-title">Project StatsPro™</h1>
+        <div class="live-clock">
+          <span class="live-dot"></span>
+          <span id="canvasLiveClock">00:00:00</span>
+        </div>
+      </div>
+    </div>
+    <p class="date-text" id="canvasDateDisp"></p>
+  </div>
+  <div class="sidebar-actions">
+    <button class="btn btn-g" onclick="resetAll()" aria-label="Reset all data"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+    <button class="btn btn-g" onclick="clearDone()" aria-label="Clear completed"><i class="fa-solid fa-broom"></i> Clear Done</button>
+    <button class="btn btn-g" onclick="exportJSON()" aria-label="Export"><i class="fa-solid fa-download"></i> Export</button>
+    <button class="btn btn-p" onclick="openProjMo()" aria-label="New project"><i class="fa-solid fa-plus"></i> New Project</button>
+  </div>
+  <div class="sidebar-footer">
+    <button class="theme-toggle" id="canvasThemeToggle" onclick="toggleTheme()" aria-label="Toggle dark or light mode"><i class="fa-solid fa-moon"></i></button>
+    <div class="user-menu-wrap" id="canvasAuthBar"></div>
+  </div>
+</aside>
+<main class="app-main">
+
+<!-- HEADER -->
+<header class="app-header fi">
+  <div class="brand-block">
+    <div class="brand-row">
+      <div class="logo-icon"><i class="fa-solid fa-chart-line"></i></div>
+      <div>
+        <h1 class="app-title">Project StatsPro™</h1>
+        <div class="live-clock">
+          <span class="live-dot"></span>
+          <span id="liveClock">00:00:00</span>
+        </div>
+      </div>
+    </div>
+    <p class="date-text" id="dateDisp"></p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-g btn-s" onclick="resetAll()" aria-label="Reset all data"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+    <button class="btn btn-g btn-s" onclick="clearDone()" aria-label="Clear completed"><i class="fa-solid fa-broom"></i> Clear Done</button>
+    <button class="btn btn-g btn-s" onclick="exportJSON()" aria-label="Export"><i class="fa-solid fa-download"></i> Export</button>
+    <button class="btn btn-p" onclick="openProjMo()" aria-label="New project"><i class="fa-solid fa-plus"></i> New Project</button>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle dark or light mode"><i class="fa-solid fa-moon"></i></button>
+    <div class="user-menu-wrap" id="authBar"></div>
+  </div>
+</header>
+
+<!-- STATS -->
+<div class="gs fi" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;animation-delay:.04s;">
+  <div class="card sc a" style="padding:18px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><p style="color:var(--muted);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Total Projects</p><p style="font-size:28px;font-weight:700;font-family:'Space Grotesk';" id="sT">0</p></div><div class="si" style="background:var(--accent-g);color:var(--accent);"><i class="fa-solid fa-folder"></i></div></div></div>
+  <div class="card sc s" style="padding:18px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><p style="color:var(--muted);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Completed</p><p style="font-size:28px;font-weight:700;font-family:'Space Grotesk';" id="sC">0</p></div><div class="si" style="background:var(--ok-g);color:var(--ok);"><i class="fa-solid fa-circle-check"></i></div></div></div>
+  <div class="card sc i" style="padding:18px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><p style="color:var(--muted);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Tasks Done</p><p style="font-size:28px;font-weight:700;font-family:'Space Grotesk';" id="sD">0</p></div><div class="si" style="background:var(--info-g);color:var(--info);"><i class="fa-solid fa-list-check"></i></div></div></div>
+  <div class="card sc d" style="padding:18px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><p style="color:var(--muted);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Streak</p><p style="font-size:28px;font-weight:700;font-family:'Space Grotesk';" id="sS">0 <span style="font-size:13px;color:var(--muted);font-weight:400;">days</span></p></div><div class="si" style="background:var(--err-g);color:var(--err);"><i class="fa-solid fa-fire"></i></div></div></div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="gm" style="display:grid;grid-template-columns:1fr 360px;gap:20px;">
+  <div>
+    <div class="card fi filter-card" style="padding:14px 18px;margin-bottom:14px;animation-delay:.08s;">
+      <div class="filter-layout" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;gap:5px;flex-wrap:wrap;" id="filterBar"></div>
+        <div class="filter-tools" style="display:flex;gap:8px;align-items:center;">
+          <select class="sort-sel" id="sortSel" onchange="renderAll()" aria-label="Sort"><option value="priority">Sort: Priority</option><option value="name">Sort: Name</option><option value="deadline">Sort: Deadline</option><option value="progress">Sort: Progress</option><option value="newest">Sort: Newest</option></select>
+          <div class="search-wrap" style="position:relative;"><i class="fa-solid fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px;"></i><input class="inp" style="padding-left:32px;width:190px;font-size:12px;" placeholder="Search..." id="searchInp" oninput="renderProjects()" aria-label="Search"></div>
+        </div>
+      </div>
+    </div>
+    <div id="projCon" style="display:flex;flex-direction:column;gap:10px;"></div>
+    <div id="emptyState" style="display:none;text-align:center;padding:56px 20px;">
+      <div style="width:72px;height:72px;border-radius:18px;background:var(--card);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;margin-bottom:18px;"><i class="fa-solid fa-inbox" style="font-size:28px;color:var(--muted);"></i></div>
+      <h3 style="font-size:17px;font-weight:600;margin-bottom:6px;">No projects found</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:18px;">Create your first project to start tracking daily progress.</p>
+      <button class="btn btn-p" onclick="openProjMo()"><i class="fa-solid fa-plus"></i> Create Project</button>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    <div class="card fi" style="padding:22px;animation-delay:.12s;"><h3 style="font-size:14px;font-weight:600;margin-bottom:18px;">Overall Progress</h3><div style="display:flex;justify-content:center;margin-bottom:14px;"><div class="cprog"><svg width="110" height="110" viewBox="0 0 110 110"><circle class="tk" cx="55" cy="55" r="45"/><circle class="fl" cx="55" cy="55" r="45" stroke="url(#pg)" stroke-dasharray="282.74" stroke-dashoffset="282.74" id="cFill"/><defs><linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F5A623"/><stop offset="100%" stop-color="#0ECB81"/></linearGradient></defs></svg><div class="lb"><span style="font-size:26px;font-weight:700;font-family:'Space Grotesk';" id="cPct">0%</span><span style="font-size:10px;color:var(--muted);">complete</span></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div style="text-align:center;padding:8px;background:var(--bg2);border-radius:8px;"><p style="font-size:17px;font-weight:700;color:var(--ok);" id="sdD">0</p><p style="font-size:10px;color:var(--muted);">Done</p></div><div style="text-align:center;padding:8px;background:var(--bg2);border-radius:8px;"><p style="font-size:17px;font-weight:700;color:var(--accent);" id="sdL">0</p><p style="font-size:10px;color:var(--muted);">Left</p></div><div style="text-align:center;padding:8px;background:var(--bg2);border-radius:8px;"><p style="font-size:17px;font-weight:700;color:var(--info);" id="sdH">0h</p><p style="font-size:10px;color:var(--muted);">Logged</p></div></div></div>
+    <div class="card fi" style="padding:22px;animation-delay:.16s;"><h3 style="font-size:14px;font-weight:600;margin-bottom:14px;">Weekly Activity</h3><div style="height:170px;"><canvas id="wC"></canvas></div></div>
+    <div class="card fi" style="padding:22px;animation-delay:.2s;"><h3 style="font-size:14px;font-weight:600;margin-bottom:14px;">14-Day Streak</h3><div id="streakG" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;"></div><p style="font-size:11px;color:var(--muted);margin-top:10px;" id="streakHint"></p></div>
+    <div class="card fi" style="padding:22px;animation-delay:.24s;"><h3 style="font-size:14px;font-weight:600;margin-bottom:14px;">Priority Breakdown</h3><div style="height:160px;"><canvas id="pC"></canvas></div></div>
+    <div class="card fi" style="padding:22px;animation-delay:.28s;"><h3 style="font-size:14px;font-weight:600;margin-bottom:14px;">Categories</h3><div id="catList"></div></div>
+  </div>
+</div>
+<footer class="app-footer">All Rights Reservered | 2026 | Project StatsPro™</footer>
+</main>
+</div>
+
+<!-- PROJECT MODAL -->
+<div class="mo" id="projMo" role="dialog" aria-modal="true"><div class="mc">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;"><h2 style="font-size:18px;font-weight:700;" id="pmT">New Project</h2><button onclick="closeMo('projMo')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div>
+  <form id="pF" onsubmit="submitProj(event)">
+    <input type="hidden" id="pId">
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Project Name *</label><input class="inp" id="pN" placeholder="e.g. Client dashboard" required maxlength="80"></div>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Description</label><textarea class="inp" id="pD" placeholder="Brief description..." rows="2" maxlength="300"></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Priority</label><select class="inp" id="pPr"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+      <div><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Category</label><select class="inp" id="pCa"><option value="Development">Development</option><option value="Design">Design</option><option value="Marketing">Marketing</option><option value="Research">Research</option><option value="Operations">Operations</option><option value="Personal">Personal</option></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Deadline</label><input class="inp" type="date" id="pDl"></div>
+      <div><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Color Tag</label><div style="display:flex;gap:6px;padding-top:4px;flex-wrap:wrap;" id="colPk"></div></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px;"><button type="button" class="btn btn-g" onclick="closeMo('projMo')">Cancel</button><button type="submit" class="btn btn-p" id="pSb">Create Project</button></div>
+  </form>
+</div></div>
+
+<!-- TASK MODAL -->
+<div class="mo" id="taskMo" role="dialog" aria-modal="true"><div class="mc">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;"><h2 style="font-size:18px;font-weight:700;" id="tmT">Add Task</h2><button onclick="closeMo('taskMo')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div>
+  <form id="tF" onsubmit="submitTask(event)">
+    <input type="hidden" id="tPid"><input type="hidden" id="tId">
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Task Name *</label><input class="inp" id="tN" placeholder="e.g. Design homepage mockup" required maxlength="120"></div>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Notes</label><textarea class="inp" id="tNo" placeholder="Optional notes..." rows="2" maxlength="300"></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Priority</label><select class="inp" id="tPr"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+      <div><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Estimated Hours</label><input class="inp" type="number" id="tHr" placeholder="1" min="0.25" step="0.25" value="1"></div>
+    </div>
+    <div id="tlSec" style="margin-bottom:14px;display:none;">
+      <label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Time Log</label>
+      <div id="tlList" style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;max-height:120px;overflow-y:auto;"></div>
+      <div style="display:flex;gap:6px;"><input class="inp" type="number" id="logMin" placeholder="Minutes" min="1" step="1" style="flex:1;"><button type="button" class="btn btn-ok btn-s" onclick="addTimeLog()"><i class="fa-solid fa-plus"></i> Log</button></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px;"><button type="button" class="btn btn-g" onclick="closeMo('taskMo')">Cancel</button><button type="submit" class="btn btn-p" id="tSb">Add Task</button></div>
+  </form>
+</div></div>
+
+<!-- DELETE CONFIRM -->
+<div class="mo" id="delMo" role="dialog" aria-modal="true"><div class="mc" style="max-width:380px;text-align:center;">
+  <div style="width:52px;height:52px;border-radius:13px;background:var(--err-g);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;"><i class="fa-solid fa-trash" style="font-size:20px;color:var(--err);"></i></div>
+  <h2 style="font-size:17px;font-weight:700;margin-bottom:6px;">Confirm Deletion</h2>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:22px;" id="delMsg">This action cannot be undone.</p>
+  <div style="display:flex;gap:8px;justify-content:center;"><button class="btn btn-g" onclick="closeMo('delMo')">Cancel</button><button class="btn btn-d" onclick="execDel()">Delete</button></div>
+</div></div>
+
+<!-- NOTES MODAL -->
+<div class="mo" id="notesMo" role="dialog" aria-modal="true"><div class="mc">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;"><h2 style="font-size:18px;font-weight:700;">Project Notes</h2><button onclick="closeMo('notesMo')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div>
+  <input type="hidden" id="nPid"><textarea class="inp" id="nArea" placeholder="Add project notes, ideas, context..." rows="8" style="font-size:14px;line-height:1.6;"></textarea>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;"><button class="btn btn-g" onclick="closeMo('notesMo')">Cancel</button><button class="btn btn-p" onclick="saveNotes()">Save Notes</button></div>
+</div></div>
+
+<!-- AUTH MODAL -->
+<div class="mo" id="authMo" role="dialog" aria-modal="true"><div class="mc">
+  <div class="auth-modal-head">
+    <button class="modal-x" onclick="closeMo('authMo')" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <img class="auth-logo" src="favicon.svg" alt="">
+    <h2 id="authTitle">Login</h2>
+  </div>
+
+  <form id="loginForm" onsubmit="submitLogin(event)">
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Email</label><input class="inp" type="email" id="loginEmail" required autocomplete="email"></div>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Password</label><input class="inp" type="password" id="loginPass" required autocomplete="current-password"></div>
+    <div class="auth-note">Admin demo login: admin@wts.local / admin123</div>
+    <button type="button" class="link-btn" onclick="showAuthMode('forgot')">Forgot password?</button>
+    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap;"><button type="button" class="btn btn-g" onclick="showAuthMode('signup')">Create Account</button><button type="submit" class="btn btn-p">Login</button></div>
+  </form>
+
+  <form id="signupForm" class="hidden" onsubmit="submitSignup(event)">
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Email</label><input class="inp" type="email" id="signupEmail" required autocomplete="email"></div>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Password</label><input class="inp" type="password" id="signupPass" required minlength="6" autocomplete="new-password"></div>
+    <div class="auth-note">A verification code is generated for this local demo. Connect a backend email service to send it for real.</div>
+    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap;"><button type="button" class="btn btn-g" onclick="showAuthMode('login')">Back to Login</button><button type="submit" class="btn btn-p">Sign Up</button></div>
+  </form>
+
+  <form id="verifyForm" class="hidden" onsubmit="submitVerification(event)">
+    <p style="font-size:13px;color:var(--fg2);line-height:1.5;margin-bottom:14px;">Enter the verification code for <strong id="verifyEmail" style="color:var(--fg);"></strong>.</p>
+    <div class="auth-code" id="demoCodeBox"></div>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Verification Code</label><input class="inp" id="verifyCode" required maxlength="6" inputmode="numeric"></div>
+    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap;"><button type="button" class="btn btn-g" onclick="showAuthMode('login')">Back to Login</button><button type="submit" class="btn btn-p">Verify Account</button></div>
+  </form>
+
+  <form id="forgotForm" class="hidden" onsubmit="submitForgotPassword(event)">
+    <p style="font-size:13px;color:var(--fg2);line-height:1.5;margin-bottom:14px;">Enter your registered email to generate a password reset code.</p>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Email</label><input class="inp" type="email" id="forgotEmail" required autocomplete="email"></div>
+    <div class="auth-note">For this local demo, the reset code is shown here. A backend email service can send it for real.</div>
+    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap;"><button type="button" class="btn btn-g" onclick="showAuthMode('login')">Back to Login</button><button type="submit" class="btn btn-p">Send Code</button></div>
+  </form>
+
+  <form id="resetForm" class="hidden" onsubmit="submitResetPassword(event)">
+    <p style="font-size:13px;color:var(--fg2);line-height:1.5;margin-bottom:14px;">Enter the reset code for <strong id="resetEmail" style="color:var(--fg);"></strong>.</p>
+    <div class="auth-code" id="resetCodeBox"></div>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Reset Code</label><input class="inp" id="resetCode" required maxlength="6" inputmode="numeric"></div>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">New Password</label><input class="inp" type="password" id="newPass" required minlength="6" autocomplete="new-password"></div>
+    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap;"><button type="button" class="btn btn-g" onclick="showAuthMode('login')">Back to Login</button><button type="submit" class="btn btn-p">Reset Password</button></div>
+  </form>
+</div></div>
+
+<!-- PROFILE MODAL -->
+<div class="mo" id="profileMo" role="dialog" aria-modal="true"><div class="mc">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;"><h2 style="font-size:18px;font-weight:700;">User Details</h2><button onclick="closeMo('profileMo')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div>
+  <form id="profileForm" onsubmit="saveProfile(event)">
+    <div class="profile-preview"><img id="profilePreview" alt=""><div><p id="profileEmail" style="font-size:13px;font-weight:600;"></p><p style="font-size:11px;color:var(--muted);">Complete your profile after login.</p></div></div>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Profile Picture</label><input class="inp" type="file" id="profilePic" accept="image/*" onchange="previewProfilePic(event)"></div>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Full Name</label><input class="inp" id="fullName" maxlength="80" required></div>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Designation</label><input class="inp" id="designation" maxlength="80" placeholder="e.g. Project Manager" required></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px;"><button type="button" class="btn btn-g" onclick="closeMo('profileMo')">Cancel</button><button type="submit" class="btn btn-p">Save Details</button></div>
+  </form>
+</div></div>
+
+<!-- ADMIN MODAL -->
+<div class="mo" id="adminMo" role="dialog" aria-modal="true"><div class="mc">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;"><h2 style="font-size:18px;font-weight:700;">Admin Panel</h2><button onclick="closeMo('adminMo')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div>
+  <div id="adminUserList"></div>
+</div></div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
