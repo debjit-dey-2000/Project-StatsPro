@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="auth-locked">
 <div class="atmos" aria-hidden="true">
   <div class="bg-grid"></div>
   <div class="bg-stream bg-stream-a"></div>
@@ -183,7 +183,13 @@
 </div></div>
 
 <!-- AUTH MODAL -->
-<div class="mo auth-gate" id="authMo" role="dialog" aria-modal="true"><div class="mc auth-card">
+<div class="mo auth-gate" id="authMo" role="dialog" aria-modal="true">
+  <div class="auth-float auth-float-a"></div>
+  <div class="auth-float auth-float-b"></div>
+  <div class="auth-float auth-float-c"></div>
+  <div class="auth-line auth-line-a"></div>
+  <div class="auth-line auth-line-b"></div>
+<div class="mc auth-card">
   <div class="auth-art">
     <img src="assets/auth-analytics-hero.png" alt="">
   </div>
@@ -206,7 +212,7 @@
       <div class="auth-two"><div class="field-row"><label>First Name</label><input class="inp" id="signupFirst" autocomplete="given-name" oninput="lettersOnly(this)" maxlength="40"></div><div class="field-row"><label>Last Name</label><input class="inp" id="signupLast" autocomplete="family-name" oninput="lettersOnly(this)" maxlength="40"></div></div>
       <div class="field-row"><label>Designation</label><input class="inp" id="signupDesignation" autocomplete="organization-title" maxlength="80"></div>
       <div class="field-row"><label>Email Id</label><input class="inp" type="text" id="signupEmail" autocomplete="email" oninput="lowercaseField(this)"></div>
-      <div class="field-row"><label>Phone number</label><div class="phone-field"><span>+91</span><input class="inp" id="signupPhone" inputmode="numeric" autocomplete="tel-national" oninput="digitsOnly(this)" maxlength="10"></div></div>
+      <div class="field-row"><label>Phone number</label><div class="phone-field"><select id="signupCountry" aria-label="Country code"><option value="+91">+91 IN</option><option value="+1">+1 US</option><option value="+44">+44 UK</option><option value="+61">+61 AU</option><option value="+971">+971 AE</option><option value="+880">+880 BD</option><option value="+977">+977 NP</option></select><input class="inp" id="signupPhone" inputmode="numeric" autocomplete="tel-national" oninput="digitsOnly(this)" maxlength="10"></div></div>
       <div class="auth-actions"><button type="button" class="btn btn-g" onclick="showAuthMode('login')">Login</button><button type="submit" class="btn btn-p">Sign Up</button></div>
     </form>
 

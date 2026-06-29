@@ -238,7 +238,7 @@ function showAuthMode(mode){
 function submitSignup(e){
   e.preventDefault();
   var first=$('signupFirst').value.trim(),last=$('signupLast').value.trim(),designation=$('signupDesignation').value.trim();
-  var email=$('signupEmail').value.trim().toLowerCase(),phone=$('signupPhone').value.trim();
+  var email=$('signupEmail').value.trim().toLowerCase(),phone=$('signupPhone').value.trim(),country=$('signupCountry').value;
   $('signupEmail').value=email;
   if(!first||!last||!designation||!email||!phone){setAuthError('All Fields are Required.');return}
   if(!validName(first)||!validName(last)){setAuthError('First name and last name can contain letters only.');return}
@@ -246,7 +246,7 @@ function submitSignup(e){
   if(!validPhone(phone)){setAuthError('Phone number must be exactly 10 numbers.');return}
   if(authUser(email)){setAuthError('Account already exists. Please login.');return}
   var fullName=first+' '+last;
-  var u={id:gid(),email:email,password:phone,phone:'+91'+phone,role:'user',verified:true,approved:true,created:today(),profile:{firstName:first,lastName:last,fullName:fullName,designation:designation,phone:'+91'+phone,photo:''}};
+  var u={id:gid(),email:email,password:phone,countryCode:country,phone:country+phone,role:'user',verified:true,approved:true,created:today(),profile:{firstName:first,lastName:last,fullName:fullName,designation:designation,countryCode:country,phone:country+phone,photo:''}};
   users.push(u);saveUsers();completeAuth(u,'Account created');
 }
 function submitVerification(e){
