@@ -120,10 +120,11 @@ function toggleTheme(){
 function chartTextColor(){return document.body.classList.contains('light')?'#4B5567':'#E2E3EB'}
 
 /* ===== MODALS ===== */
+function authLocked(){return document.body.classList.contains('auth-locked')&&!currentUser}
 function openMo(id){$(id).classList.add('on');document.body.style.overflow='hidden'}
-function closeMo(id){$(id).classList.remove('on');document.body.style.overflow=''}
-document.querySelectorAll('.mo').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o){o.classList.remove('on');document.body.style.overflow=''}})});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){document.querySelectorAll('.mo.on').forEach(function(m){m.classList.remove('on');document.body.style.overflow=''});closeSidebarCanvas()}});
+function closeMo(id){if(id==='authMo'&&authLocked())return;$(id).classList.remove('on');document.body.style.overflow=authLocked()?'hidden':''}
+document.querySelectorAll('.mo').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o){if(o.id==='authMo'&&authLocked())return;o.classList.remove('on');document.body.style.overflow=authLocked()?'hidden':''}})});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){document.querySelectorAll('.mo.on').forEach(function(m){if(m.id==='authMo'&&authLocked())return;m.classList.remove('on')});document.body.style.overflow=authLocked()?'hidden':'';closeSidebarCanvas()}});
 function openSidebarCanvas(){
   var c=$('sidebarCanvas'),s=$('sidebarScrim');if(!c||!s)return;
   c.classList.add('on');s.classList.add('on');c.setAttribute('aria-hidden','false');
@@ -160,10 +161,31 @@ function newCode(){return String(Math.floor(100000+Math.random()*900000))}
 function userLabel(u){return S(S(u,'profile',{}),'fullName','')||u.email}
 function userInitials(u){var n=userLabel(u).trim();return(n[0]||'U').toUpperCase()}
 function isAdmin(){return currentUser&&currentUser.role==='admin'}
+function setAuthError(msg){
+  var el=$('authErr');if(!el)return;
+  el.textContent=msg||'';el.classList.toggle('on',!!msg);
+}
+function lowercaseField(el){el.value=String(el.value||'').toLowerCase()}
+function lettersOnly(el){el.value=String(el.value||'').replace(/[^A-Za-z ]/g,'').replace(/\s{2,}/g,' ')}
+function digitsOnly(el){el.value=String(el.value||'').replace(/\D/g,'').slice(0,10)}
+function validName(v){return/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(String(v||'').trim())}
+function validEmail(v){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim())}
+function validPhone(v){return/^\d{10}$/.test(String(v||''))}
+function completeAuth(u,msg){
+  currentUser=u;localStorage.setItem(SESS,u.id);renderAuthBar();applyAuthGate();toast(msg||'Logged in','ok');
+}
+function applyAuthGate(preferredMode){
+  var locked=!currentUser;
+  document.body.classList.toggle('auth-locked',locked);
+  var shell=document.querySelector('.app-shell');
+  if(shell)shell.setAttribute('aria-hidden',locked?'true':'false');
+  if(locked){showAuthMode(preferredMode||'signup');document.body.style.overflow='hidden'}
+  else{if($('authMo'))$('authMo').classList.remove('on');document.body.style.overflow=''}
+}
 function requireAuth(){
   if(currentUser)return true;
-  toast('Please login first','in');
-  showAuthMode('login');
+  toast('Please sign up or login first','in');
+  applyAuthGate('signup');
   return false;
 }
 function renderAuthBar(){
@@ -204,6 +226,7 @@ function closeUserMenu(exceptSuffix){
 }
 document.addEventListener('click',closeUserMenu);
 function showAuthMode(mode){
+  setAuthError('');
   ['loginForm','signupForm','verifyForm','forgotForm','resetForm'].forEach(function(id){$(id).classList.add('hidden')});
   if(mode==='signup'){$('authTitle').textContent='Create Account';$('signupForm').classList.remove('hidden')}
   else if(mode==='verify'){$('authTitle').textContent='Verify Email';$('verifyForm').classList.remove('hidden')}
@@ -214,12 +237,17 @@ function showAuthMode(mode){
 }
 function submitSignup(e){
   e.preventDefault();
-  var email=$('signupEmail').value.trim().toLowerCase(),pass=$('signupPass').value;
-  if(authUser(email)){toast('Account already exists','er');return}
-  var code=newCode();
-  users.push({id:gid(),email:email,password:pass,role:'user',verified:false,approved:false,code:code,created:today(),profile:{fullName:'',designation:'',photo:''}});
-  saveUsers();pendingVerifyEmail=email;$('verifyEmail').textContent=email;$('demoCodeBox').textContent=code;$('verifyCode').value='';
-  showAuthMode('verify');toast('Verification code generated','in');
+  var first=$('signupFirst').value.trim(),last=$('signupLast').value.trim(),designation=$('signupDesignation').value.trim();
+  var email=$('signupEmail').value.trim().toLowerCase(),phone=$('signupPhone').value.trim();
+  $('signupEmail').value=email;
+  if(!first||!last||!designation||!email||!phone){setAuthError('All Fields are Required.');return}
+  if(!validName(first)||!validName(last)){setAuthError('First name and last name can contain letters only.');return}
+  if(!validEmail(email)){setAuthError('Enter a valid lowercase email address.');return}
+  if(!validPhone(phone)){setAuthError('Phone number must be exactly 10 numbers.');return}
+  if(authUser(email)){setAuthError('Account already exists. Please login.');return}
+  var fullName=first+' '+last;
+  var u={id:gid(),email:email,password:phone,phone:'+91'+phone,role:'user',verified:true,approved:true,created:today(),profile:{firstName:first,lastName:last,fullName:fullName,designation:designation,phone:'+91'+phone,photo:''}};
+  users.push(u);saveUsers();completeAuth(u,'Account created');
 }
 function submitVerification(e){
   e.preventDefault();
@@ -229,17 +257,24 @@ function submitVerification(e){
 }
 function submitLogin(e){
   e.preventDefault();
-  var u=authUser($('loginEmail').value),pass=$('loginPass').value;
-  if(!u||u.password!==pass){toast('Invalid email or password','er');return}
+  var email=$('loginEmail').value.trim().toLowerCase(),pass=$('loginPass').value.trim();
+  $('loginEmail').value=email;
+  if(!email||!pass){setAuthError('All Fields are Required.');return}
+  if(!validEmail(email)){setAuthError('Enter a valid lowercase email address.');return}
+  var u=authUser(email),phonePass=pass.replace(/\D/g,'');
+  if(!u||(u.password!==pass&&String(S(u,'phone','')).replace(/\D/g,'')!==phonePass)){setAuthError('Invalid email or password.');return}
   if(!u.verified){pendingVerifyEmail=u.email;$('verifyEmail').textContent=u.email;$('demoCodeBox').textContent=u.code||'------';showAuthMode('verify');toast('Verify your email first','in');return}
-  if(!u.approved){toast('Account is waiting for admin approval','er');return}
-  currentUser=u;localStorage.setItem(SESS,u.id);closeMo('authMo');renderAuthBar();toast('Logged in','ok');
+  if(!u.approved){setAuthError('Account is waiting for admin approval.');return}
+  completeAuth(u,'Logged in');
   if(u.role!=='admin'&&(!S(u.profile,'fullName','')||!S(u.profile,'designation','')))openProfile();
 }
 function submitForgotPassword(e){
   e.preventDefault();
   var email=$('forgotEmail').value.trim().toLowerCase(),u=authUser(email);
-  if(!u){toast('No account found for that email','er');return}
+  $('forgotEmail').value=email;
+  if(!email){setAuthError('All Fields are Required.');return}
+  if(!validEmail(email)){setAuthError('Enter a valid lowercase email address.');return}
+  if(!u){setAuthError('No account found for that email.');return}
   u.resetCode=newCode();pendingResetEmail=email;saveUsers();
   $('resetEmail').textContent=email;$('resetCodeBox').textContent=u.resetCode;$('resetCode').value='';$('newPass').value='';
   showAuthMode('reset');toast('Password reset code generated','in');
@@ -251,7 +286,7 @@ function submitResetPassword(e){
   u.password=pass;u.resetCode='';saveUsers();pendingResetEmail='';
   showAuthMode('login');toast('Password updated. Please login.','ok');
 }
-function logoutUser(){currentUser=null;localStorage.removeItem(SESS);renderAuthBar();toast('Logged out','in')}
+function logoutUser(){currentUser=null;localStorage.removeItem(SESS);renderAuthBar();toast('Logged out','in');applyAuthGate('signup')}
 function openProfile(){
   if(!requireAuth())return;
   $('profileEmail').textContent=currentUser.email;
@@ -637,4 +672,4 @@ applyTheme(localStorage.getItem(TK)||'dark');
 var dateText=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 ['dateDisp','canvasDateDisp'].forEach(function(id){var el=$(id);if(el)el.textContent=dateText});
 try{expanded=new Set(JSON.parse(localStorage.getItem(EXP)||'[]'))}catch(e){expanded=new Set()}
-loadUsers();renderAuthBar();loadData();renderFilters();renderAll();
+loadUsers();renderAuthBar();loadData();renderFilters();renderAll();applyAuthGate('signup');

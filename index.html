@@ -183,26 +183,32 @@
 </div></div>
 
 <!-- AUTH MODAL -->
-<div class="mo" id="authMo" role="dialog" aria-modal="true"><div class="mc">
-  <div class="auth-modal-head">
-    <button class="modal-x" onclick="closeMo('authMo')" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-    <img class="auth-logo" src="favicon.svg" alt="">
-    <h2 id="authTitle">Login</h2>
+<div class="mo auth-gate" id="authMo" role="dialog" aria-modal="true"><div class="mc auth-card">
+  <div class="auth-art">
+    <img src="assets/auth-analytics-hero.png" alt="">
   </div>
+  <div class="auth-panel">
+    <div class="auth-modal-head">
+      <button class="modal-x" onclick="closeMo('authMo')" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      <img class="auth-logo" src="favicon.svg" alt="">
+      <h2 id="authTitle">Create Account</h2>
+    </div>
+    <p class="auth-error" id="authErr" role="alert"></p>
 
-  <form id="loginForm" onsubmit="submitLogin(event)">
-    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Email</label><input class="inp" type="email" id="loginEmail" required autocomplete="email"></div>
-    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Password</label><input class="inp" type="password" id="loginPass" required autocomplete="current-password"></div>
-    <button type="button" class="link-btn" onclick="showAuthMode('forgot')">Forgot password?</button>
-    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap;"><button type="button" class="btn btn-g" onclick="showAuthMode('signup')">Create Account</button><button type="submit" class="btn btn-p">Login</button></div>
-  </form>
+    <form id="loginForm" onsubmit="submitLogin(event)">
+      <div class="field-row"><label>Email Id</label><input class="inp" type="text" id="loginEmail" autocomplete="email" oninput="lowercaseField(this)"></div>
+      <div class="field-row"><label>Password / Phone</label><input class="inp" type="password" id="loginPass" autocomplete="current-password"></div>
+      <button type="button" class="link-btn" onclick="showAuthMode('forgot')">Forgot password?</button>
+      <div class="auth-actions"><button type="button" class="btn btn-g" onclick="showAuthMode('signup')">Create Account</button><button type="submit" class="btn btn-p">Login</button></div>
+    </form>
 
-  <form id="signupForm" class="hidden" onsubmit="submitSignup(event)">
-    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Email</label><input class="inp" type="email" id="signupEmail" required autocomplete="email"></div>
-    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Password</label><input class="inp" type="password" id="signupPass" required minlength="6" autocomplete="new-password"></div>
-    <div class="auth-note">A verification code is generated for this local demo. Connect a backend email service to send it for real.</div>
-    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap;"><button type="button" class="btn btn-g" onclick="showAuthMode('login')">Back to Login</button><button type="submit" class="btn btn-p">Sign Up</button></div>
-  </form>
+    <form id="signupForm" class="hidden" onsubmit="submitSignup(event)">
+      <div class="auth-two"><div class="field-row"><label>First Name</label><input class="inp" id="signupFirst" autocomplete="given-name" oninput="lettersOnly(this)" maxlength="40"></div><div class="field-row"><label>Last Name</label><input class="inp" id="signupLast" autocomplete="family-name" oninput="lettersOnly(this)" maxlength="40"></div></div>
+      <div class="field-row"><label>Designation</label><input class="inp" id="signupDesignation" autocomplete="organization-title" maxlength="80"></div>
+      <div class="field-row"><label>Email Id</label><input class="inp" type="text" id="signupEmail" autocomplete="email" oninput="lowercaseField(this)"></div>
+      <div class="field-row"><label>Phone number</label><div class="phone-field"><span>+91</span><input class="inp" id="signupPhone" inputmode="numeric" autocomplete="tel-national" oninput="digitsOnly(this)" maxlength="10"></div></div>
+      <div class="auth-actions"><button type="button" class="btn btn-g" onclick="showAuthMode('login')">Login</button><button type="submit" class="btn btn-p">Sign Up</button></div>
+    </form>
 
   <form id="verifyForm" class="hidden" onsubmit="submitVerification(event)">
     <p style="font-size:13px;color:var(--fg2);line-height:1.5;margin-bottom:14px;">Enter the verification code for <strong id="verifyEmail" style="color:var(--fg);"></strong>.</p>
@@ -213,7 +219,7 @@
 
   <form id="forgotForm" class="hidden" onsubmit="submitForgotPassword(event)">
     <p style="font-size:13px;color:var(--fg2);line-height:1.5;margin-bottom:14px;">Enter your registered email to generate a password reset code.</p>
-    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Email</label><input class="inp" type="email" id="forgotEmail" required autocomplete="email"></div>
+    <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">Email</label><input class="inp" type="text" id="forgotEmail" autocomplete="email" oninput="lowercaseField(this)"></div>
     <div class="auth-note">For this local demo, the reset code is shown here. A backend email service can send it for real.</div>
     <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap;"><button type="button" class="btn btn-g" onclick="showAuthMode('login')">Back to Login</button><button type="submit" class="btn btn-p">Send Code</button></div>
   </form>
@@ -225,6 +231,7 @@
     <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:500;color:var(--fg2);margin-bottom:5px;">New Password</label><input class="inp" type="password" id="newPass" required minlength="6" autocomplete="new-password"></div>
     <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap;"><button type="button" class="btn btn-g" onclick="showAuthMode('login')">Back to Login</button><button type="submit" class="btn btn-p">Reset Password</button></div>
   </form>
+  </div>
 </div></div>
 
 <!-- PROFILE MODAL -->
