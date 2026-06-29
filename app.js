@@ -578,7 +578,7 @@ function renderProjects(){
       +'<div class="project-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;"><div class="project-copy" style="flex:1;min-width:0;">'
       +'<div class="project-title-row" style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;">'
       +'<div style="width:8px;height:8px;border-radius:50%;background:'+col+';flex-shrink:0;"></div>'
-      +'<h3 style="font-size:15px;font-weight:600;'+(comp?'text-decoration:line-through;':'')+'">'+esc(S(p,'name',''))+'</h3>'
+      +'<h3 style="font-size:15px;font-weight:600;">'+esc(S(p,'name',''))+'</h3>'
       +'<span class="cat-badge" style="background:'+catCol+'22;color:'+catCol+';">'+cat+'</span>'
       +'<span class="pri pri-'+priClass+'">'+pri+'</span>'
       +(comp?'<span style="font-size:10px;color:var(--ok);font-weight:600;display:flex;align-items:center;gap:2px;"><i class="fa-solid fa-circle-check"></i>Done</span>':'')
