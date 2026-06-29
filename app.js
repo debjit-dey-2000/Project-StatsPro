@@ -12,7 +12,7 @@ var VER_KEY='pp_v5';
 
 /* ===== CONSTANTS ===== */
 var SK='pp_data',STK='pp_streak',EXP='pp_exp',UK='wts_users',SESS='wts_session',TK='wts_theme';
-var ADMIN_EMAIL='admin@wts.local',ADMIN_PASS='admin123';
+var ADMIN_EMAIL='debjitwts@gmail.com',ADMIN_PASS='Debjitdev@2026',OLD_ADMIN_EMAIL='admin@wts.local';
 var COLORS=['#F5A623','#0ECB81','#3861FB','#F6465D','#A855F7','#EC4899','#14B8A6','#EF4444'];
 var CAT_C={Development:'#3861FB',Design:'#A855F7',Marketing:'#F5A623',Research:'#14B8A6',Operations:'#EC4899',Personal:'#0ECB81'};
 var FILTERS=[{key:'all',label:'All'},{key:'active',label:'Active'},{key:'completed',label:'Completed'},{key:'high',label:'High Priority'},{key:'archived',label:'Archived'}];
@@ -136,8 +136,19 @@ function closeSidebarCanvas(){
 /* ===== AUTH ===== */
 function loadUsers(){
   try{users=JSON.parse(localStorage.getItem(UK)||'[]');if(!Array.isArray(users))users=[]}catch(e){users=[]}
+  var oldAdmin=users.find(function(u){return u.email===OLD_ADMIN_EMAIL&&u.role==='admin'});
+  var existingAdmin=users.find(function(u){return u.email===ADMIN_EMAIL&&u.role==='admin'});
+  if(oldAdmin&&existingAdmin){
+    users=users.filter(function(u){return!(u.email===OLD_ADMIN_EMAIL&&u.role==='admin')});
+  }else if(oldAdmin){
+    oldAdmin.email=ADMIN_EMAIL;oldAdmin.password=ADMIN_PASS;oldAdmin.verified=true;oldAdmin.approved=true;
+  }
   if(!users.some(function(u){return u.email===ADMIN_EMAIL})){
     users.push({id:gid(),email:ADMIN_EMAIL,password:ADMIN_PASS,role:'admin',verified:true,approved:true,created:today(),profile:{fullName:'Administrator',designation:'Site Administrator',photo:''}});
+  }
+  var admin=users.find(function(u){return u.email===ADMIN_EMAIL&&u.role==='admin'});
+  if(admin){
+    admin.password=ADMIN_PASS;admin.verified=true;admin.approved=true;
     saveUsers();
   }
   var sid=localStorage.getItem(SESS);
